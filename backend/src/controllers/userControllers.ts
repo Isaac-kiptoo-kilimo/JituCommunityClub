@@ -55,6 +55,77 @@ export const registerUserController=async (req:Request,res:Response)=>{
 }
 
 
+export const updateUserController = async (req: Request, res: Response) => {
+    try {
+      const { fName,lName, email,cohortNumber } = req.body;
+      const {userID}=req.params
+  
+      const { error } = validateUpdateuser.validate(req.body);
+      if (error)
+        return res.status(403).json({ success: false, message: error.details[0].message });
+  
+        const pool = await mssql.connect(dbConfig)
+       
+        let result = await pool.request()
+        .input("userID", mssql.VarChar, userID) 
+        .input("fName", mssql.VarChar, fName)
+        .input("lName", mssql.VarChar, lName)
+        .input("email", mssql.VarChar, email) 
+        .input("cohortNumber", mssql.VarChar, cohortNumber) 
+        .execute('updateUser')
+  
+      // const updatedUser=await dbhelpers.execute('updateUser', {userID,fName,lName,  email,cohortNumber});
+  
+      return res.json({ 
+          message: "User updated successfully" 
+      });
+  
+  
+    } catch (error) {
+  
+      console.log(error);
+      return res.status(500).json({
+        error: error,
+      });
+    }
+  };
+  
+  
+  
+  export const getSingleUserController = async (req: Request, res: Response) => {
+      try {
+        const userID = req.params.userID;
+        console.log(userID);
+        if (!userID) return res.status(403).send({ message: "Id is required" });
+    
+        
+        const result = await dbhelpers.execute('getSingleUser', { userID });
+    
+        res.json(result.recordset);
+        
+      } catch (error) {
+        return res.json(400).json({
+          error:error
+        })
+      }
+    };
+  
+    export const deleteUserController=async(req:Request,res:Response)=>{
+      try{
+          const {userID}=req.params
+  
+          const deleteUser=await dbhelpers.execute('deleteUser',{userID})
+          return res.json({
+              message:'User deleted successfully'
+          })
+      }catch(error){
+          return res.json({
+              error:error
+          })
+      }
+    }
+
+
 export const loginUserController=async (req:Request,res:Response)=>{
     try {
         const {email, password} = req.body
@@ -162,65 +233,5 @@ export const getAllUsersControllers=async(req:Request, res:Response)=>{
 }
 
 
-export const updateUserController = async (req: Request, res: Response) => {
-  try {
-    const { fName,lName, email,cohortNumber } = req.body;
-    const {userID}=req.params
 
-    const { error } = validateUpdateuser.validate(req.body);
-    if (error)
-      return res.status(403).json({ success: false, message: error.details[0].message });
-     
-    // console.log(updatedUser);
-
-    const updatedUser=await dbhelpers.execute('updateUser', {userID,fName,lName,  email,cohortNumber});
-
-    return res.json({ 
-        message: "User updated successfully" 
-    });
-
-
-  } catch (error) {
-
-    console.log(error);
-    return res.status(500).json({
-      error: error,
-    });
-  }
-};
-
-
-
-export const getSingleUserController = async (req: Request, res: Response) => {
-    try {
-      const userID = req.params.userID;
-      console.log(userID);
-      if (!userID) return res.status(403).send({ message: "Id is required" });
-  
-      
-      const result = await dbhelpers.execute('getSingleUser', { userID });
-  
-      res.json(result.recordset);
-      
-    } catch (error) {
-      return res.json(400).json({
-        error:error
-      })
-    }
-  };
-
-  export const deleteUserController=async(req:Request,res:Response)=>{
-    try{
-        const {userID}=req.params
-
-        const deleteUser=await dbhelpers.execute('deleteUser',{userID})
-        return res.json({
-            message:'User deleted successfully'
-        })
-    }catch(error){
-        return res.json({
-            error:error
-        })
-    }
-  }
 

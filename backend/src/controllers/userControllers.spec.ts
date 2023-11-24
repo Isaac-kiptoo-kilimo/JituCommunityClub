@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import {v4} from 'uuid'
 import { Request, Response } from 'express'
-import { deleteUserController, getAllUsersControllers, getSingleUserController, registerUserController, updateUserController } from './userControllers'
+import { deleteUserController, getAllUsersControllers, getSingleUserController, loginUserController, registerUserController, updateUserController } from './userControllers'
 
 
 describe ("User Registration", ()=>{
@@ -204,7 +204,129 @@ describe ("User Registration", ()=>{
 
     })
 
+    describe ("Testing Login Functionality", ()=>{
 
+      let res:any
+  
+      beforeEach(()=>{
+          res={
+              status: jest.fn().mockReturnThis(),
+              json: jest.fn().mockReturnThis()
+          }
+      })
+  
+      it('Returns an error if email or password is empty' ,async()=>{
+          const req = {
+              body:{
+                  email: "",
+                  password: ""
+              }
+          }
+  
+          await loginUserController(req as Request, res)
+  
+          expect(res.json).toHaveBeenCalledWith({"error": "\"email\" is not allowed to be empty"})
+  
+      })
+  
+      it('Returns an error if email or password is missing' ,async()=>{
+          const req = {
+              body:{
+                  
+              }
+          }
+  
+          await loginUserController(req as Request, res)
+  
+          expect(res.json).toHaveBeenCalledWith({"error": "\"email\" is required"})
+  
+      })
+  
+      it("Returns an error if email is not in database", async()=>{
+          const req = {
+              body:{
+                  email: "Emmanuel.Manu@thejitu.com",
+                  password: "12345678@Em"
+              }
+          }
+  
+          jest.spyOn(mssql, 'connect').mockResolvedValueOnce({
+              request: jest.fn().mockReturnThis(),
+              input: jest.fn().mockReturnThis(),
+              execute: jest.fn().mockResolvedValueOnce({recordset: []})
+          } as never)
+  
+          await loginUserController(req as Request, res)
+  
+          expect(res.json).toHaveBeenCalledWith({error: "Email not found"}) 
+      })
+  
+      it("Handles incorrect password scenario", async()=>{
+          const req = {
+              body:{
+                  email: "Emmanuel.Manu@thejitu.com",
+                  password: "12345678@EM"
+              }
+          }
+  
+          jest.spyOn(mssql, 'connect').mockResolvedValueOnce({
+              request: jest.fn().mockReturnThis(),
+              input: jest.fn().mockReturnThis(),
+              execute: jest.fn().mockResolvedValueOnce({
+                  recordset: [{
+                      email: 'Emmanuel.Manu@thejitu.com',
+                      password: 'hashedPwd'
+                  }]
+              })
+          } as never)
+  
+          jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false as never)
+  
+          await loginUserController(req as Request, res)
+  
+          expect(res.json).toHaveBeenCalledWith({error: "Incorrect password"})
+      })
+  
+      it("successfully logs in a user and returns a token", async()=>{
+  
+          let expectedUser = {
+              userID: "7fda9578-0147-49f3-a90e-a34a10cf13ef",
+              fName: "Emmanuel",
+              lName: "Manu",
+              email: "Emmanuel.Manu@thejitu.com",
+              password: "$2b$05$9HCBX0QnlqDQQTg6dnCwuuTa97.aiYa1e.Svg1xKUscNDTYZ6ydDi",
+              role: "user",
+              hasBooked: 1,
+              resetPassword: null
+          }
+  
+          const req = {
+              body:{
+                  email: expectedUser.email,
+                  password: "12345678@Em"
+              }
+          }
+  
+          jest.spyOn(mssql, 'connect').mockResolvedValueOnce({
+              request: jest.fn().mockReturnThis(),
+              input: jest.fn().mockReturnThis(),
+              execute: jest.fn().mockResolvedValueOnce({recordset: [expectedUser]})
+          } as never)
+  
+          jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true as never)
+  
+          jest.spyOn(jwt, 'sign').mockReturnValueOnce("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiI0YzMwYzE4MS0zNmE5LTQ3MTUtYWVlZS0wOTA2ZTEwNjliMDEiLCJmdWxsTmFtZSI6Ik1hbnUiLCJlbWFpbCI6ImVtbWFudWVsbWFudUBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImhhc0Jvb2tlZCI6MCwicmVzZXRQYXNzd29yZCI6MCwiaWF0IjoxNzAwNzczMjg0LCJleHAiOjE3MDA5NDYwODR9.9zZD1KEtt5kIsbD6u9RWZuit9pqT5T31QazznTVaxZg" as never)
+  
+          await loginUserController(req as Request, res)
+  
+          expect(res.json).toHaveBeenCalledWith({
+              message: "Logged in successfully",
+              token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiI0YzMwYzE4MS0zNmE5LTQ3MTUtYWVlZS0wOTA2ZTEwNjliMDEiLCJmdWxsTmFtZSI6Ik1hbnUiLCJlbWFpbCI6ImVtbWFudWVsbWFudUBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImhhc0Jvb2tlZCI6MCwicmVzZXRQYXNzd29yZCI6MCwiaWF0IjoxNzAwNzczMjg0LCJleHAiOjE3MDA5NDYwODR9.9zZD1KEtt5kIsbD6u9RWZuit9pqT5T31QazznTVaxZg"
+          }) 
+      }) 
+  
+      })
+  
 
 
     

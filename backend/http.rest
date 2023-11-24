@@ -3,7 +3,7 @@ POST http://localhost:5000/users/register/
 Content-Type: application/json
 
 {
-    "fName": "nJoh",
+    "fName": "John",
     "lName": "Doe",
     "email": "John.Doe@thejitu.com",
     "password": "YourSecurePassword123@",
@@ -23,7 +23,7 @@ Content-Type: application/json
 
 ### fetching all users
 GET http://localhost:5000/users/
-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiJmOTlhYzVlZS1jOWRhLTRmN2MtYjcxOS02MmFlMzZmNWI2YjUiLCJmdWxsTmFtZSI6ImlzYWFjIEtpbGltbyIsImVtYWlsIjoiaXNhYWNraWxpbW9rMkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDA3NjkyOTMsImV4cCI6MTcwMDk0MjA5M30.QA2sXFe-cWrhq6y7jsqhR9VbcAhobQJa0GtnA7i88nY
+token:
 
 
 ###update user
@@ -38,7 +38,7 @@ Content-Type: application/json
 
 ### fetching single user
 GET http://localhost:5000/users/singleUser/f99ac5ee-c9da-4f7c-b719-62ae36f5b6b5/
-token:  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiJmOTlhYzVlZS1jOWRhLTRmN2MtYjcxOS02MmFlMzZmNWI2YjUiLCJmdWxsTmFtZSI6ImlzYWFjIEtpbGltbyIsImVtYWlsIjoiaXNhYWNraWxpbW9rMkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJoYXNCb29rZWQiOjEsInJlc2V0UGFzc3dvcmQiOm51bGwsImlhdCI6MTcwMDc5NzAwNSwiZXhwIjoxNzAwOTY5ODA1fQ.zTajHdnjgynT37ygVyur4YeYNP9hJAZq7nko_e-OaKk
+token:  
 
 
 
